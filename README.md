@@ -32,7 +32,7 @@ A modern web application for managing gas utility service requests with Material
 
 1. Clone this repository:
    ```
-   git clone <repository-url>
+   git clone https://github.com/saurabhdubeyy/gas-utility-service.git
    cd gas_utility_service
    ```
 
@@ -78,4 +78,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Contact
 
-For questions or support, please contact [your-email@example.com]. 
+For questions or support, please contact [saurabhdubeykpl@gmail.com]. 
