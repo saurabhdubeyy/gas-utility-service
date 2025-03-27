@@ -1,0 +1,53 @@
+version: '3'
+
+services:
+  # Database
+  db:
+    image: postgres:16
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-gas_utility_service}
+    ports:
+      - "5432:5432"
+    restart: always
+
+  # Web application
+  web:
+    build: .
+    restart: always
+    depends_on:
+      - db
+    env_file:
+      - ./.env
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-gas_utility_service}
+      - DEBUG=False
+
+  # Nginx for serving static files
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - static_volume:/home/app/staticfiles
+      - media_volume:/home/app/media
+    depends_on:
+      - web
+    restart: always
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume: 

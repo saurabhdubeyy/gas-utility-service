@@ -2,6 +2,7 @@ Django==5.1.7
 Pillow==10.2.0  # For image handling
 django-crispy-forms==2.1  # Optional: for better form rendering
 psycopg2-binary==2.9.9  # For PostgreSQL (production)
-gunicorn==21.2.0  # For production deployment
+gunicorn==22.0.0
 django-environ==0.11.2  # For environment variables (production)
-whitenoise==6.6.0  # For static files in production 
+whitenoise==6.5.0  # For static files in production
+python-decouple==3.8 
