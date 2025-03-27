@@ -6,4 +6,5 @@ urlpatterns = [
     path('dashboard/', views.support_dashboard, name='support_dashboard'),
     path('register/', views.register_support, name='register_support'),
     path('setup/<str:token>/', views.setup_support_user, name='setup_support_user'),
+    path('create-default-user/', views.create_default_support_user, name='create_default_support_user'),
 ] 

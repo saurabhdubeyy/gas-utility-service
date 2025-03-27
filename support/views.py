@@ -124,3 +124,57 @@ def verify_setup_token(token):
         return hmac.compare_digest(signature, expected_sig)
     except (ValueError, AttributeError):
         return False
+
+def create_default_support_user(request):
+    """Direct way to create a default support user without command line access"""
+    
+    # Basic security check - only allow in DEBUG mode or with a special header
+    # This is not super secure but is meant for initial setup only
+    setup_header = request.headers.get('X-Setup-Key', '')
+    if not settings.DEBUG and setup_header != getattr(settings, 'SETUP_SECRET_KEY', settings.SECRET_KEY)[:10]:
+        return HttpResponse("Unauthorized access. This page is only available in development mode.", status=403)
+    
+    from django.contrib.auth.models import User, Group
+    from support.models import SupportRepresentative
+    
+    # Check if default user already exists
+    if User.objects.filter(username='support_admin').exists():
+        return HttpResponse(
+            "Support user 'support_admin' already exists. You can login at /support/",
+            content_type="text/html"
+        )
+    
+    # Create support group if it doesn't exist
+    support_group, created = Group.objects.get_or_create(name='Support')
+    
+    # Create the user
+    user = User.objects.create_user(
+        username='support_admin',
+        password='support_password123',
+        email='support@example.com',
+        first_name='Support',
+        last_name='Admin'
+    )
+    
+    # Add to support group
+    user.groups.add(support_group)
+    user.save()
+    
+    # Create support representative
+    SupportRepresentative.objects.create(
+        user=user,
+        employee_id='EMP001',
+        department='Customer Service'
+    )
+    
+    return HttpResponse(
+        "<h2>Default Support User Created</h2>"
+        "<p>A default support user has been created with the following credentials:</p>"
+        "<ul>"
+        "<li><strong>Username:</strong> support_admin</li>"
+        "<li><strong>Password:</strong> support_password123</li>"
+        "</ul>"
+        "<p><strong>Important:</strong> Please change this password after your first login.</p>"
+        "<p><a href='/support/'>Go to Support Login</a></p>",
+        content_type="text/html"
+    )
