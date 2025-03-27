@@ -5,6 +5,13 @@ from django.contrib.auth import authenticate, login
 from .forms import SupportRepresentativeForm
 from requests.models import ServiceRequest
 from .models import SupportRepresentative
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.core.management import call_command
+from django.conf import settings
+import hashlib
+import hmac
+import time
 
 def is_admin(user):
     return user.is_superuser
@@ -62,3 +69,58 @@ def support_dashboard(request):
         'status_counts': status_counts,
         'latest_requests': latest_requests
     })
+
+# A secure setup function that requires a token
+def setup_support_user(request, token=None):
+    # Only allow this in development or with the correct token
+    if not settings.DEBUG and not verify_setup_token(token):
+        return HttpResponse("Unauthorized access", status=401)
+    
+    # Generate a random suffix for the username to avoid conflicts
+    timestamp = int(time.time())
+    
+    # Call the management command
+    call_command(
+        'create_support_user',
+        username=f'support_admin_{timestamp}',
+        password=f'Support{timestamp}!',
+        email=f'support{timestamp}@example.com',
+        first_name='Support',
+        last_name='Administrator',
+        employee_id=f'EMP{timestamp}',
+        department='Customer Service'
+    )
+    
+    # Return the credentials (only for initial setup)
+    return HttpResponse(
+        f"Support user created successfully:<br>"
+        f"Username: support_admin_{timestamp}<br>"
+        f"Password: Support{timestamp}!<br>"
+        f"<strong>Important:</strong> Please save these credentials and delete this setup URL after use.",
+        content_type="text/html"
+    )
+
+def verify_setup_token(token):
+    """Verify a setup token (basic time-based token verification)"""
+    setup_key = getattr(settings, 'SETUP_SECRET_KEY', settings.SECRET_KEY)
+    
+    try:
+        # Token format: timestamp.signature
+        timestamp, signature = token.split('.')
+        
+        # Check if token is not expired (1 hour validity)
+        current_time = int(time.time())
+        token_time = int(timestamp)
+        if current_time - token_time > 3600:  # 1 hour
+            return False
+        
+        # Verify signature
+        expected_sig = hmac.new(
+            setup_key.encode(),
+            timestamp.encode(),
+            hashlib.sha256
+        ).hexdigest()
+        
+        return hmac.compare_digest(signature, expected_sig)
+    except (ValueError, AttributeError):
+        return False
