@@ -1,74 +1,88 @@
-# Deployment Guide for Gas Utility Service
+# 🚀 Deployment Guide for Gas Utility Service
 
-This guide covers deploying the Gas Utility Service application to various hosting platforms.
+This guide covers deploying the Gas Utility Service application to various hosting platforms, with a focus on Render.
 
-## Preparing for Deployment
+## 🔧 Preparing for Deployment
 
-1. **Update Settings**: Ensure your `settings.py` is configured correctly:
+Before deploying the application, ensure:
+
+1. **Configuration**: Update `settings.py`:
    - Set `DEBUG = False`
    - Configure `ALLOWED_HOSTS`
-   - Set up a secure `SECRET_KEY`
+   - Use a secure `SECRET_KEY`
 
 2. **Static Files**: Run `python manage.py collectstatic` to collect all static files.
 
-3. **Database**: Consider migrating to PostgreSQL for production use.
+3. **Database**: For production, use PostgreSQL instead of SQLite.
 
 4. **Environment Variables**: Set up environment variables based on `.env.example`.
 
-## Deployment Options
+## 📋 Deployment on Render (Recommended)
 
-### 1. Heroku Deployment
+Render offers a straightforward deployment process for Django applications with a generous free tier.
 
-Heroku offers simple deployment for Django applications.
+### Prerequisites
+- A [Render account](https://render.com/)
+- Your code pushed to GitHub
 
-#### Requirements
-- Heroku CLI installed
-- Git repository initialized
-- Procfile (already provided)
-- requirements.txt (already updated)
-- runtime.txt (already provided)
+### Step-by-Step Deployment
 
-#### Steps
-1. Create a Heroku app:
-   ```
-   heroku create your-app-name
-   ```
+1. **Create a New Web Service**:
+   - Log in to Render and click "New +"
+   - Select "Web Service"
+   - Connect your GitHub repository
 
-2. Set environment variables:
-   ```
-   heroku config:set SECRET_KEY=your-secret-key-here
-   heroku config:set DEBUG=False
-   heroku config:set ALLOWED_HOSTS=your-app-name.herokuapp.com
-   ```
+2. **Configure the Service**:
+   - **Name**: `gas-utility-service` (or choose your own)
+   - **Environment**: Python 3
+   - **Region**: Choose closest to your users
+   - **Branch**: master
+   - **Build Command**: `chmod +x build_files/build.sh && ./build_files/build.sh`
+   - **Start Command**: `gunicorn gas_utility_service.wsgi:application`
+   - **Plan**: Free
 
-3. Add PostgreSQL:
-   ```
-   heroku addons:create heroku-postgresql:mini
-   ```
+3. **Set Environment Variables**:
+   - Click on "Environment" tab
+   - Add these variables:
+     ```
+     SECRET_KEY=<generate-a-secure-random-key>
+     DEBUG=False
+     ALLOWED_HOSTS=gas-utility-service.onrender.com,*.onrender.com
+     ```
 
-4. Deploy your application:
-   ```
-   git push heroku master
-   ```
+4. **Add a PostgreSQL Database**:
+   - Click "New +" again and select "PostgreSQL"
+   - Use Free plan
+   - Name it `gas-utility-db`
+   - Render will automatically link the database to your web service
 
-5. Run migrations:
-   ```
-   heroku run python manage.py migrate
-   ```
+5. **Deploy Your Application**:
+   - Click "Create Web Service"
+   - Wait for the build and deployment to complete (5-10 minutes)
 
-6. Create a superuser:
-   ```
-   heroku run python manage.py createsuperuser
-   ```
+6. **Create a Support User**:
+   - Visit your application URL at `https://gas-utility-service.onrender.com/support/create-default-user/`
+   - This will create a default support user with username `support_admin` and password `support_password123`
 
-### 2. VPS Deployment (Digital Ocean, AWS EC2, etc.)
+7. **Access Your Application**:
+   - Your app will be available at `https://gas-utility-service.onrender.com`
+
+### 📝 Notes on Render Free Tier
+- The app will "sleep" after 15 minutes of inactivity
+- The first request after inactivity will take longer to respond
+- You get 750 hours of free usage per month
+- PostgreSQL databases on the free tier are limited to 1GB storage
+
+## 🌐 Alternative Deployment Options
+
+### 1. VPS Deployment (Digital Ocean, AWS EC2, etc.)
 
 #### Prerequisites
 - A VPS running Ubuntu/Debian
 - Domain name (optional but recommended)
 
 #### Steps
-1. Set up your server:
+1. **Set up your server**:
    ```bash
    sudo apt update
    sudo apt install python3-pip python3-dev libpq-dev postgresql postgresql-contrib nginx
@@ -76,132 +90,62 @@ Heroku offers simple deployment for Django applications.
 
 2. Create a PostgreSQL database and user.
 
-3. Set up a Python virtual environment:
+3. **Set up a Python virtual environment**:
    ```bash
    python3 -m venv env
    source env/bin/activate
    pip install -r requirements.txt
    ```
 
-4. Configure Gunicorn and Nginx (sample configs below).
+4. **Configure environment variables** in a `.env` file.
 
-5. Set up environment variables in a `.env` file based on `.env.example`.
-
-6. Collect static files and run migrations:
+5. **Collect static files and run migrations**:
    ```bash
    python manage.py collectstatic
    python manage.py migrate
    ```
 
-7. Configure Nginx:
-   ```
-   server {
-       listen 80;
-       server_name your-domain.com;
-   
-       location = /favicon.ico { access_log off; log_not_found off; }
-       location /static/ {
-           root /path/to/your/project;
-       }
-       
-       location /media/ {
-           root /path/to/your/project;
-       }
-   
-       location / {
-           include proxy_params;
-           proxy_pass http://unix:/path/to/your/project/your-project.sock;
-       }
-   }
-   ```
+6. **Configure Nginx and Gunicorn**:
+   - Create a systemd service for Gunicorn
+   - Set up Nginx as a reverse proxy
 
-8. Configure Gunicorn service file.
-
-### 3. Docker Deployment
-
-For Docker deployment, create a Dockerfile and docker-compose.yml file in your project root:
-
-#### Dockerfile
-```dockerfile
-FROM python:3.11-slim
-
-WORKDIR /app
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . .
-
-RUN python manage.py collectstatic --noinput
-
-EXPOSE 8000
-
-CMD ["gunicorn", "gas_utility_service.wsgi:application", "--bind", "0.0.0.0:8000"]
-```
-
-#### docker-compose.yml
-```yaml
-version: '3'
-
-services:
-  db:
-    image: postgres:16
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    env_file:
-      - ./.env
-    environment:
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_DB=gas_utility_service
-
-  web:
-    build: .
-    restart: always
-    depends_on:
-      - db
-    env_file:
-      - ./.env
-    volumes:
-      - .:/app
-      - static_volume:/app/staticfiles
-      - media_volume:/app/media
-    ports:
-      - "8000:8000"
-
-volumes:
-  postgres_data:
-  static_volume:
-  media_volume:
-```
-
-Run with:
-```
-docker-compose up -d
-```
-
-## SSL Configuration
-
-For secure deployment, enable HTTPS using Let's Encrypt:
-
-1. Install Certbot:
-   ```
+7. **Set up SSL with Let's Encrypt**:
+   ```bash
    sudo apt install certbot python3-certbot-nginx
-   ```
-
-2. Get certificates:
-   ```
    sudo certbot --nginx -d your-domain.com
    ```
 
-## Monitoring and Maintenance
+### 2. Docker Deployment
 
-1. Set up regular database backups
-2. Configure logging
-3. Consider implementing a monitoring solution (e.g., Sentry for error tracking)
+For containerized deployment:
 
-## Troubleshooting
+1. **Build and run with Docker Compose**:
+   ```bash
+   docker-compose up -d
+   ```
 
-- Check Nginx and Gunicorn logs for errors
-- Ensure database connections are properly configured
-- Verify static files are being served correctly 
+2. **Create a support user**:
+   ```bash
+   docker-compose exec web python manage.py create_support_user
+   ```
+
+3. **Access the application** at `http://localhost:8000` or your domain.
+
+## 🔒 Security Considerations
+
+For production deployments:
+
+1. **Always use HTTPS** in production
+2. **Secure environment variables** and never expose sensitive information
+3. **Keep dependencies updated** to avoid security vulnerabilities
+4. **Configure database backups** for data protection
+5. **Set up proper logging** for monitoring
+
+## 🔍 Troubleshooting
+
+- **Check logs**: Render provides logs for debugging
+- **Verify environment variables**: Misconfigured variables often cause issues
+- **Confirm database connection**: Test database connectivity
+- **Check allowed hosts**: Ensure your domain is in the ALLOWED_HOSTS setting
+
+For additional assistance, refer to the [Render documentation](https://render.com/docs) or open an issue on GitHub. 

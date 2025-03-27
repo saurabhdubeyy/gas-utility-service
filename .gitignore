@@ -5,10 +5,14 @@
 __pycache__/
 local_settings.py
 db.sqlite3
+db.sqlite3-journal
 media
+staticfiles/
 
 # Backup files #
 *.bak
+*.tmp
+*.temp
 
 # Python #
 *.py[cod]
@@ -35,6 +39,7 @@ MANIFEST
 # Unit test / coverage reports #
 htmlcov/
 .tox/
+.nox/
 .coverage
 .coverage.*
 .cache
@@ -42,6 +47,7 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
+.pytest_cache/
 
 # Environments #
 .env
@@ -57,15 +63,19 @@ venv.bak/
 .vscode/
 *.swp
 *.swo
+*~
 
-# OS generated files #
+# macOS
 .DS_Store
-.DS_Store?
+.AppleDouble
+.LSOverride
+Icon
 ._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
+
+# Windows
 Thumbs.db
+ehthumbs.db
+Desktop.ini
 
 # Deployment Files
 .env.prod
@@ -73,10 +83,9 @@ Thumbs.db
 *.key
 
 # Docker
-node_modules
-/dist
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
 yarn.lock
 package-lock.json 

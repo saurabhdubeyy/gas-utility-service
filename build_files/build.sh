@@ -1,16 +1,18 @@
-#!/usr/bin/env bash
-# exit on error
+#!/bin/bash
+# Build script for Render deployment
+
+# Exit on error
 set -o errexit
 
-# Install dependencies
+# Python version: 3.9.12
+echo "Installing dependencies..."
+pip install --upgrade pip
 pip install -r requirements.txt
 
-# Collect static files
+echo "Collecting static files..."
 python manage.py collectstatic --no-input
 
-# Apply database migrations
+echo "Running migrations..."
 python manage.py migrate
 
-# Try to create default support user if none exists, but don't fail the build if it errors
-echo "Attempting to create default support user..."
-python manage.py create_support_user || echo "Support user creation skipped or failed (this is not critical)" 
+echo "Build completed successfully!" 
