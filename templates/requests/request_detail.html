@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+
+{% block title %}Request #{{ service_request.id }} - Gas Utility Service{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                {% if is_support %}
+                <li class="breadcrumb-item"><a href="{% url 'support_dashboard' %}"><i class="fas fa-tachometer-alt me-1"></i>Support Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'all_requests' %}"><i class="fas fa-list-alt me-1"></i>All Requests</a></li>
+                {% else %}
+                <li class="breadcrumb-item"><a href="{% url 'customer_dashboard' %}"><i class="fas fa-home me-1"></i>Dashboard</a></li>
+                {% endif %}
+                <li class="breadcrumb-item active"><i class="fas fa-ticket-alt me-1"></i>Request #{{ service_request.id }}</li>
+            </ol>
+        </nav>
+        
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center p-3">
+                <h3 class="mb-0"><i class="fas fa-ticket-alt me-2"></i>Service Request #{{ service_request.id }}</h3>
+                <span class="badge rounded-pill {% if service_request.status == 'submitted' %}bg-warning{% elif service_request.status == 'in_progress' %}bg-info{% elif service_request.status == 'resolved' %}bg-success{% elif service_request.status == 'canceled' %}bg-danger{% endif %} fs-5 px-3 py-2">
+                    {{ service_request.get_status_display }}
+                </span>
+            </div>
+            <div class="card-body p-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="border-bottom pb-2 mb-3"><i class="fas fa-info-circle me-2"></i>Request Information</h5>
+                        <table class="table table-hover">
+                            <tr>
+                                <th><i class="fas fa-user me-2"></i>Customer:</th>
+                                <td>{{ service_request.customer.user.get_full_name }} ({{ service_request.customer.account_number }})</td>
+                            </tr>
+                            <tr>
+                                <th><i class="fas fa-tag me-2"></i>Request Type:</th>
+                                <td>{{ service_request.get_request_type_display }}</td>
+                            </tr>
+                            <tr>
+                                <th><i class="fas fa-calendar-plus me-2"></i>Submitted:</th>
+                                <td>{{ service_request.submitted_at|date:"F d, Y - H:i" }}</td>
+                            </tr>
+                            {% if service_request.resolved_at %}
+                            <tr>
+                                <th><i class="fas fa-calendar-check me-2"></i>Resolved:</th>
+                                <td>{{ service_request.resolved_at|date:"F d, Y - H:i" }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if service_request.attachment %}
+                            <tr>
+                                <th><i class="fas fa-paperclip me-2"></i>Attachment:</th>
+                                <td><a href="{{ service_request.attachment.url }}" class="btn btn-sm btn-outline-primary ripple-surface" target="_blank"><i class="fas fa-file-download me-1"></i>View Attachment</a></td>
+                            </tr>
+                            {% endif %}
+                        </table>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h5 class="border-bottom pb-2 mb-3"><i class="fas fa-align-left me-2"></i>Request Details</h5>
+                        <div class="p-3 bg-light rounded shadow-sm">
+                            {{ service_request.details|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+                
+                {% if is_support %}
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-secondary text-white p-3">
+                                <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Update Status</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="update_status" value="1">
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-outline">
+                                                <select name="{{ status_form.status.html_name }}" 
+                                                        class="form-select {% if status_form.status.errors %}is-invalid{% endif %}" 
+                                                        id="{{ status_form.status.id_for_label }}">
+                                                    {% for value, text in status_form.status.field.choices %}
+                                                        <option value="{{ value }}" {% if status_form.status.value == value %}selected{% endif %}>
+                                                            {{ text }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                                <label class="form-label" for="{{ status_form.status.id_for_label }}">Status</label>
+                                            </div>
+                                            {{ status_form.status.errors }}
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-outline">
+                                                <input type="datetime-local" name="{{ status_form.resolved_at.html_name }}" 
+                                                       class="form-control {% if status_form.resolved_at.errors %}is-invalid{% endif %}" 
+                                                       id="{{ status_form.resolved_at.id_for_label }}"
+                                                       value="{{ status_form.resolved_at.value|date:'Y-m-d\TH:i'|default:'' }}">
+                                                <label class="form-label" for="{{ status_form.resolved_at.id_for_label }}">Resolution Date</label>
+                                                <div class="form-helper">Only required for "Resolved" status</div>
+                                            </div>
+                                            {{ status_form.resolved_at.errors }}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-grid gap-2">
+                                        <button type="submit" class="btn btn-primary ripple-surface"><i class="fas fa-save me-2"></i>Update Status</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow">
+            <div class="card-header bg-secondary text-white p-3">
+                <h4 class="mb-0"><i class="fas fa-comments me-2"></i>Comments</h4>
+            </div>
+            <div class="card-body p-4">
+                {% if comments %}
+                <div class="comment-list">
+                    {% for comment in comments %}
+                    <div class="comment mb-3 p-3 border rounded shadow-sm {% if comment.author == service_request.customer.user %}bg-light{% else %}bg-primary bg-opacity-10{% endif %}">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <strong>
+                                    {% if comment.author.is_staff or comment.author.groups.all %}
+                                    <i class="fas fa-headset me-1"></i>
+                                    {% else %}
+                                    <i class="fas fa-user me-1"></i>
+                                    {% endif %}
+                                    {{ comment.author.get_full_name|default:comment.author.username }}
+                                </strong>
+                                {% if comment.author.is_staff or comment.author.groups.all %}
+                                <span class="badge rounded-pill bg-primary ms-2">Support</span>
+                                {% else %}
+                                <span class="badge rounded-pill bg-secondary ms-2">Customer</span>
+                                {% endif %}
+                            </div>
+                            <small class="text-muted"><i class="far fa-clock me-1"></i>{{ comment.created_at|date:"F d, Y - H:i" }}</small>
+                        </div>
+                        <div class="comment-content">
+                            {{ comment.text|linebreaks }}
+                        </div>
+                        {% if is_support and not comment.is_customer_visible %}
+                        <div class="mt-2">
+                            <span class="badge rounded-pill bg-warning"><i class="fas fa-eye-slash me-1"></i>Internal Note - Not Visible to Customer</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info d-flex align-items-center">
+                    <i class="fas fa-info-circle me-2 fa-lg"></i>
+                    <div>No comments yet.</div>
+                </div>
+                {% endif %}
+                
+                <div class="add-comment mt-4">
+                    <h5 class="border-bottom pb-2 mb-3"><i class="fas fa-plus-circle me-2"></i>Add Comment</h5>
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="form-outline mb-4">
+                            <textarea name="{{ comment_form.text.html_name }}" 
+                                      class="form-control {% if comment_form.text.errors %}is-invalid{% endif %}" 
+                                      id="{{ comment_form.text.id_for_label }}" rows="3"></textarea>
+                            <label class="form-label" for="{{ comment_form.text.id_for_label }}">Comment</label>
+                            {{ comment_form.text.errors }}
+                        </div>
+                        
+                        {% if is_support %}
+                        <div class="form-check form-switch mb-3">
+                            <input type="checkbox" name="{{ comment_form.is_customer_visible.html_name }}" 
+                                   class="form-check-input {% if comment_form.is_customer_visible.errors %}is-invalid{% endif %}" 
+                                   id="{{ comment_form.is_customer_visible.id_for_label }}" 
+                                   {% if comment_form.is_customer_visible.value %}checked{% endif %}>
+                            <label class="form-check-label" for="{{ comment_form.is_customer_visible.id_for_label }}">
+                                Visible to Customer
+                            </label>
+                            <div class="form-text">Uncheck this box to make this comment visible only to support staff.</div>
+                            {{ comment_form.is_customer_visible.errors }}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary ripple-surface"><i class="fas fa-paper-plane me-2"></i>Add Comment</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize MDB form inputs
+        document.querySelectorAll('.form-outline').forEach(function(formOutline) {
+            new mdb.Input(formOutline).init();
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}Support Dashboard - Gas Utility Service{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center p-3">
+                <h3 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>Support Dashboard</h3>
+                <a href="{% url 'all_requests' %}" class="btn btn-light ripple-surface">
+                    <i class="fas fa-list me-1"></i>View All Requests
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <div class="card shadow-sm h-100 border-0 status-card status-submitted">
+                            <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                                <div class="rounded-circle bg-warning text-white d-flex justify-content-center align-items-center mb-3" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-file-alt fa-2x"></i>
+                                </div>
+                                <h2 class="counter">{{ status_counts.submitted }}</h2>
+                                <p class="mb-0">Submitted</p>
+                            </div>
+                            <div class="card-footer bg-transparent border-0">
+                                <a href="{% url 'all_requests' %}?status=submitted" class="btn btn-link text-warning">
+                                    <i class="fas fa-arrow-right me-1"></i>View All
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <div class="card shadow-sm h-100 border-0 status-card status-in-progress">
+                            <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                                <div class="rounded-circle bg-info text-white d-flex justify-content-center align-items-center mb-3" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-spinner fa-2x"></i>
+                                </div>
+                                <h2 class="counter">{{ status_counts.in_progress }}</h2>
+                                <p class="mb-0">In Progress</p>
+                            </div>
+                            <div class="card-footer bg-transparent border-0">
+                                <a href="{% url 'all_requests' %}?status=in_progress" class="btn btn-link text-info">
+                                    <i class="fas fa-arrow-right me-1"></i>View All
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <div class="card shadow-sm h-100 border-0 status-card status-resolved">
+                            <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                                <div class="rounded-circle bg-success text-white d-flex justify-content-center align-items-center mb-3" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-check-circle fa-2x"></i>
+                                </div>
+                                <h2 class="counter">{{ status_counts.resolved }}</h2>
+                                <p class="mb-0">Resolved</p>
+                            </div>
+                            <div class="card-footer bg-transparent border-0">
+                                <a href="{% url 'all_requests' %}?status=resolved" class="btn btn-link text-success">
+                                    <i class="fas fa-arrow-right me-1"></i>View All
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <div class="card shadow-sm h-100 border-0 status-card status-canceled">
+                            <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                                <div class="rounded-circle bg-danger text-white d-flex justify-content-center align-items-center mb-3" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-ban fa-2x"></i>
+                                </div>
+                                <h2 class="counter">{{ status_counts.canceled }}</h2>
+                                <p class="mb-0">Canceled</p>
+                            </div>
+                            <div class="card-footer bg-transparent border-0">
+                                <a href="{% url 'all_requests' %}?status=canceled" class="btn btn-link text-danger">
+                                    <i class="fas fa-arrow-right me-1"></i>View All
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow">
+            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center p-3">
+                <h4 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Latest Unresolved Requests</h4>
+            </div>
+            <div class="card-body">
+                {% if latest_requests %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Customer</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Submitted</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for request in latest_requests %}
+                            <tr>
+                                <td>{{ request.id }}</td>
+                                <td>{{ request.customer.user.get_full_name|default:request.customer.user.username }}</td>
+                                <td>{{ request.get_request_type_display }}</td>
+                                <td>
+                                    {% if request.status == 'submitted' %}
+                                    <span class="badge rounded-pill bg-warning">Submitted</span>
+                                    {% elif request.status == 'in_progress' %}
+                                    <span class="badge rounded-pill bg-info">In Progress</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ request.submitted_at|date:"M d, Y" }}</td>
+                                <td>
+                                    <a href="{% url 'request_detail' request_id=request.id %}" class="btn btn-sm btn-primary ripple-surface">
+                                        <i class="fas fa-eye me-1"></i>View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-success d-flex align-items-center">
+                    <i class="fas fa-check-circle me-2 fa-2x"></i>
+                    <div>No unresolved requests! Great job!</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Add ripple effect to elements with ripple-surface class
+    document.querySelectorAll('.btn').forEach(function(btn) {
+        btn.classList.add('ripple-surface');
+    });
+</script>
+{% endblock %}
+{% endblock %} 

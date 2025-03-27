@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Support Login - Gas Utility Service{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Support Staff Login</h3>
+            </div>
+            <div class="card-body">
+                {% if form.errors %}
+                <div class="alert alert-danger" role="alert">
+                    <strong>Error:</strong> Invalid username or password. Please try again.
+                </div>
+                {% endif %}
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="id_username" class="form-label">Username</label>
+                        <input type="text" name="username" class="form-control {% if form.username.errors %}is-invalid{% endif %}" id="id_username" required>
+                        {% if form.username.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.username.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <input type="password" name="password" class="form-control {% if form.password.errors %}is-invalid{% endif %}" id="id_password" required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="bi bi-eye" id="toggleIcon"></i> Show
+                            </button>
+                            {% if form.password.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.password.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </div>
+                </form>
+                
+                <div class="mt-3">
+                    <div class="alert alert-info" role="alert">
+                        <strong>Note:</strong> This login is for support staff only. If you are a customer, please <a href="{% url 'login' %}">login here</a>.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('id_password');
+        const toggleIcon = document.getElementById('toggleIcon');
+        
+        togglePassword.addEventListener('click', function() {
+            // Toggle the type attribute
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            // Toggle the icon and button text
+            if (type === 'password') {
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+                this.textContent = ' Show';
+                toggleIcon.outerHTML = '<i class="bi bi-eye" id="toggleIcon"></i>';
+            } else {
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+                this.textContent = ' Hide';
+                toggleIcon.outerHTML = '<i class="bi bi-eye-slash" id="toggleIcon"></i>';
+            }
+        });
+    });
+</script>
+{% endblock %} 
