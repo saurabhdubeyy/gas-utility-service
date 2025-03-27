@@ -44,7 +44,7 @@ def customer_dashboard(request):
             user=request.user,
             account_number=f"AUTO-{request.user.id}",
             address="Please update your address",
-            phone_number="Please update your phone number"
+            phone_number="Update needed"
         )
         messages.warning(request, "Your profile is incomplete. Please update your information.")
         
