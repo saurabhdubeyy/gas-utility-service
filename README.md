@@ -1,141 +1,78 @@
-# Gas Utility Customer Service
+# Gas Utility Service
 
-A modern web application for managing gas utility service requests with Material Design UI. This system allows customers to submit service requests and support staff to manage and resolve them efficiently.
+![Gas Utility Service](https://img.shields.io/badge/Status-Active-brightgreen)
+![Django](https://img.shields.io/badge/Django-5.1-green)
+![License](https://img.shields.io/badge/License-MIT-blue)
+![Render](https://img.shields.io/badge/Deployment-Render-blue)
 
-## 🌟 Live Demo
+A comprehensive web application for gas utility companies to manage customer service requests and support operations. The application provides dedicated interfaces for both customers and support staff, streamlining the service request process from submission to resolution.
 
-The application is deployed at: [https://gas-utility-service.onrender.com](https://gas-utility-service.onrender.com)
+## 🚀 Live Demo
 
-Demo Credentials:
-- **Customer:** username: `customer1` password: `customer123`
-- **Support:** username: `support_admin` password: `support_password123`
+Visit the live application: [Gas Utility Service](https://gas-utility-service.onrender.com)
+
+### Demo Credentials
+
+- **Customer Login:** customer@example.com / customer123
+- **Support Login:** support_admin / support_password123
 
 ## ✨ Features
 
-- **Material Design UI**
-  - Modern, responsive interface
-  - Intuitive user experience
-  - Beautiful visual elements and animations
+### Customer Interface
+- User registration and account management
+- Service request submission for various gas utility issues
+- Real-time tracking of request status
+- Communication with support staff
+- Profile management with address and contact information
 
-- **Customer Interface**
-  - Account registration and profile management
-  - Service request submission with attachments
-  - Request tracking and status updates
-  - Direct communication with support staff
+### Support Staff Interface
+- Comprehensive dashboard with request statistics
+- Management of service requests (update status, add comments)
+- Efficient workflow for request resolution
+- User management for support representatives
 
-- **Support Staff Interface**
-  - Dashboard with service request statistics
-  - Comprehensive request management
-  - Internal notes and customer communications
-  - Multi-step workflow for resolution
-  - User management capabilities
+## 🛠️ Technology Stack
 
-## 🔧 Technology Stack
+- **Backend:** Django 5.1
+- **Database:** PostgreSQL
+- **Frontend:** HTML5, CSS3, JavaScript, Material Design Bootstrap
+- **Deployment:** Render
+- **Authentication:** Django Authentication System
+- **File Storage:** WhiteNoise for static files
+- **Security:** CSRF Protection, Password Hashing
 
-- **Backend:** Django 5.1.7
-- **Frontend:** Material Design Bootstrap (MDB)
-- **Database:** PostgreSQL (production) / SQLite (development)
-- **Hosting:** Render
-- **Other:** Whitenoise for static files, Gunicorn for production server
-
-## 📋 Installation
-
-### Local Development
-
-1. Clone this repository:
-   ```
-   git clone https://github.com/saurabhdubeyy/gas-utility-service.git
-   cd gas-utility-service
-   ```
-
-2. Create and activate a virtual environment:
-   ```
-   python -m venv env
-   env\Scripts\activate  # On Windows
-   source env/bin/activate  # On macOS/Linux
-   ```
-
-3. Install dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
-
-4. Run migrations:
-   ```
-   python manage.py migrate
-   ```
-
-5. Create a superuser:
-   ```
-   python manage.py createsuperuser
-   ```
-
-6. Run the development server:
-   ```
-   python manage.py runserver
-   ```
-
-7. Access the application at http://127.0.0.1:8000/
-
-### Production Deployment
-
-This application is configured for deployment on Render, but can be deployed on any platform that supports Django.
-
-Detailed deployment instructions are available in [DEPLOYMENT.md](DEPLOYMENT.md).
-
-## 👥 Support Staff Setup
-
-There are multiple ways to create support staff accounts:
-
-1. **Using the Admin Interface**:
-   - Log in as a superuser
-   - Create a new user
-   - Add them to the "Support" group
-   - Create a SupportRepresentative object linked to this user
-
-2. **Using the Direct URL**:
-   - Visit `/support/create-default-user/` to create a default support user
-   - This creates a user with credentials:
-     - Username: `support_admin`
-     - Password: `support_password123`
-
-3. **Programmatically**:
-   - Use the Django management command:
-     ```
-     python manage.py create_support_user
-     ```
-
-Complete details on support system functionality are available in [SUPPORT_SETUP.md](SUPPORT_SETUP.md).
-
-## 🚀 Project Structure
+## 📋 Project Structure
 
 ```
 gas_utility_service/
-├── accounts/        # User authentication and profiles
-├── requests/        # Service request management
-├── support/         # Support staff functionality
-├── templates/       # HTML templates
-├── static/          # CSS, JS, and other static files
-└── gas_utility_service/  # Project settings
+├── accounts/           # Customer account management
+├── requests/           # Service request functionality
+├── support/            # Support staff interface
+├── templates/          # HTML templates
+├── static/             # CSS, JS, and other static files
+└── gas_utility_service/# Project settings
 ```
 
-## 🔒 Security
+## 🔧 Local Development
 
-This application implements Django's security best practices:
-- CSRF protection
-- Secure password storage
-- User permission controls
-- Form validation
+See the [Installation Guide](../README.md#installation) for instructions on setting up the project locally.
 
-For production deployments, ensure:
-- DEBUG is set to False
-- SECRET_KEY is securely stored
-- HTTPS is enabled
+## 🚀 Deployment
 
-## 📄 License
+See the [Deployment Guide](../DEPLOYMENT.md) for instructions on deploying the application to production.
+
+## 🔐 Support Staff Setup
+
+See the [Support Setup Guide](../SUPPORT_SETUP.md) for instructions on setting up support staff users.
+
+## 📝 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Contact
+## 🤝 Contributing
 
-For questions or support, please contact [saurabhdubeykpl@gmail.com]. 
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📞 Contact
+
+For any questions or feedback, please open an issue on this repository. 
