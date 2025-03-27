@@ -1,0 +1,25 @@
+services:
+  # A web service for the Django application
+  - type: web
+    name: gas-utility-service
+    runtime: python
+    buildCommand: chmod +x build_files/build.sh && ./build_files/build.sh
+    startCommand: gunicorn gas_utility_service.wsgi:application
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: gas-utility-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+      - key: ALLOWED_HOSTS
+        value: gas-utility-service.onrender.com,*.onrender.com
+
+databases:
+  # PostgreSQL database
+  - name: gas-utility-db
+    databaseName: gas_utility_db
+    user: gas_utility_user
+    plan: free 
