@@ -153,11 +153,72 @@ LOGIN_REDIRECT_URL = 'customer_dashboard'
 
 # Security settings for production
 if not DEBUG:
+    # Check if we're on Render.com
+    ON_RENDER = config('RENDER', default=False, cast=bool)
+    
+    # Only set SSL redirect to True if not on Render (as Render handles SSL termination)
+    if not ON_RENDER:
+        SECURE_SSL_REDIRECT = True
+    else:
+        SECURE_SSL_REDIRECT = False
+    
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Logging Configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.server': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+    },
+}
+
+# Add file handler only if not on Render (where we might not have write permissions)
+if not config('RENDER', default=False, cast=bool):
+    LOGGING['handlers']['file'] = {
+        'level': 'ERROR',
+        'class': 'logging.FileHandler',
+        'filename': os.path.join(BASE_DIR, 'django-errors.log'),
+        'formatter': 'verbose',
+    }
+    
+    # Add file handler to all loggers
+    for logger in LOGGING['loggers'].values():
+        logger['handlers'].append('file')
