@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 from decouple import config, Csv
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +28,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-abcdefghijklmnopqrstu
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,gas-utility-service.onrender.com', cast=Csv())
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,gas-utility-service.onrender.com,*.onrender.com', cast=Csv())
 
 
 # Application definition
@@ -80,6 +81,7 @@ WSGI_APPLICATION = 'gas_utility_service.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# Default SQLite database for development
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -87,9 +89,10 @@ DATABASES = {
     }
 }
 
-# For production, uncomment to use PostgreSQL
-# import dj_database_url
-# DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
+# Configure database from DATABASE_URL environment variable (if present)
+DATABASE_URL = config('DATABASE_URL', default=None)
+if DATABASE_URL:
+    DATABASES['default'] = dj_database_url.parse(DATABASE_URL)
 
 
 # Password validation
